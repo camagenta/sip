@@ -40,6 +40,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Favicon (SIP logo) -->
+  <link rel="icon" type="image/png" href="logo-sip.png" />
+  <link rel="apple-touch-icon" href="logo-sip.png" />
+
   <style>
     /* Smooth number input - hide spinner */
     input[type="number"]::-webkit-inner-spin-button,
@@ -76,9 +80,7 @@
   <!-- ============================================ -->
   <header class="bg-white border-b border-stone-200 no-print">
     <div class="max-w-lg mx-auto px-4 py-4 sm:py-5 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-full bg-sip-700 flex items-center justify-center text-white text-sm font-bold shrink-0">
-        SIP
-      </div>
+      <img src="logo-sip.png" alt="SIP Logo" class="w-9 h-9 rounded-full object-cover shrink-0" />
       <div class="min-w-0">
         <h1 class="text-sm font-bold text-stone-900 truncate" style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif;">
           Verifikator SIP
@@ -114,12 +116,13 @@
                          focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none
                          transition duration-150">
             <option value="">Pilih jenis bantuan...</option>
-            <option value="Sembako">Sembako</option>
-            <option value="Bantuan Tunai">Bantuan Tunai</option>
-            <option value="Bantuan Pendidikan">Bantuan Pendidikan</option>
             <option value="Bantuan Kesehatan">Bantuan Kesehatan</option>
-            <option value="Bantuan Modal Usaha">Bantuan Modal Usaha</option>
-            <option value="Bantuan Perumahan">Bantuan Perumahan</option>
+            <option value="Bantuan Pendidikan">Bantuan Pendidikan</option>
+            <option value="Bantuan Kebutuhan Pokok">Bantuan Kebutuhan Pokok</option>
+            <option value="Santunan Anak Yatim">Santunan Anak Yatim</option>
+            <option value="Santunan Anak Asuh">Santunan Anak Asuh</option>
+            <option value="Santunan Lembaga Tahfidz">Santunan Lembaga Tahfidz</option>
+            <option value="Sedekah Air Bersih">Sedekah Air Bersih</option>
             <option value="Lainnya">Lainnya</option>
           </select>
           <p class="text-xs text-red-500 mt-1 hidden" id="err-jenis">Pilih jenis bantuan</p>
