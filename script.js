@@ -157,7 +157,7 @@
       'Penyerahan bantuan',
       '📝 LAPORAN PENYERAHAN BANTUAN',
       '',
-      '🗒Jenis Bantuan : ' + data.jenis,
+      '🗒 Jenis Bantuan : ' + data.jenis,
       '',
       '💰 Jumlah : Rp. ' + data.jumlah + ',-',
       '',
@@ -167,7 +167,7 @@
       '',
       '📆 Tanggal Penyerahan : ' + data.tanggal,
       '',
-      '👤 Yang menyerahkan :',
+      '🖋 Yang menyerahkan :',
       data.verifikator,
       data.jabatan || '',
     ];
