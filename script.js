@@ -36,17 +36,21 @@
    * HELPERS
    * ========================================================= */
 
-  /** Indonesian month names */
+  /** Indonesian day & month names */
+  const DAYS = [
+    'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu',
+  ];
   const MONTHS = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
   ];
 
-  /** Format YYYY-MM-DD → "10 Juni 2026" */
+  /** Format YYYY-MM-DD → "Rabu, 10 Juni 2026" */
   function formatDate(iso) {
     if (!iso) return '';
     const [y, m, d] = iso.split('-');
-    return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]} ${y}`;
+    const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+    return `${DAYS[date.getDay()]}, ${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]} ${y}`;
   }
 
   /** Strip non-digit chars, return raw number string */
@@ -163,7 +167,7 @@
       '',
       '📆 Tanggal Penyerahan : ' + data.tanggal,
       '',
-      '✍ Yang menyerahkan :',
+      '👤 Yang menyerahkan :',
       data.verifikator,
       data.jabatan || '',
     ];
