@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIP — PENYALURAN Bantuan</title>
+  <meta name="description" content="Laporan penyerahan bantuan SIP. Cepat, seragam, siap kirim ke Telegram/WhatsApp." />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Merriweather', 'serif'],
+            body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            sip: {
+              50:  '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="logo-sip.png" />
+  <style>
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    @media print { .no-print { display: none; } }
+    .result-enter { opacity: 0; transform: translateY(8px); }
+    .result-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  </style>
+</head>
+<body class="bg-stone-50 font-body text-stone-800 antialiased min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-white border-b border-stone-200 no-print">
+    <div class="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
+      <img src="logo-sip.png" alt="SIP Logo" class="w-9 h-9 rounded-full object-cover shrink-0" />
+      <div class="min-w-0 flex-1">
+        <h1 class="text-sm font-bold text-stone-900 truncate">PENYALURAN Bantuan</h1>
+        <p class="text-xs text-stone-500">Laporan Penyerahan Bantuan</p>
+      </div>
+      <a href="index.html" class="text-xs text-stone-400 hover:text-stone-600 underline shrink-0">Kembali</a>
+    </div>
+  </header>
+
+  <!-- FORM -->
+  <main class="max-w-lg mx-auto px-4 pt-6 pb-20">
+    <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+      <div class="px-4 sm:px-6 pt-5 pb-3 border-b border-stone-100">
+        <h2 class="text-base font-bold text-stone-800">Data Penyerahan Bantuan</h2>
+        <p class="text-xs text-stone-400 mt-0.5">Isi data bantuan yang telah disalurkan</p>
+      </div>
+
+      <form id="reportForm" class="px-4 sm:px-6 pt-4 pb-5 space-y-4" novalidate>
+        <div>
+          <label for="jenis" class="block text-xs font-semibold text-stone-700 mb-1.5">Jenis Bantuan <span class="text-red-500">*</span></label>
+          <select id="jenis" name="jenis" required
+                  class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150">
+            <option value="">Pilih jenis bantuan...</option>
+            <option value="Bantuan Kesehatan">Bantuan Kesehatan</option>
+            <option value="Bantuan Pendidikan">Bantuan Pendidikan</option>
+            <option value="Bantuan Kebutuhan Pokok">Bantuan Kebutuhan Pokok</option>
+            <option value="Santunan Anak Yatim">Santunan Anak Yatim</option>
+            <option value="Santunan Anak Asuh">Santunan Anak Asuh</option>
+            <option value="Santunan Lembaga Tahfidz">Santunan Lembaga Tahfidz</option>
+            <option value="Sedekah Air Bersih">Sedekah Air Bersih</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+          <p class="text-xs text-red-500 mt-1 hidden" id="err-jenis">Pilih jenis bantuan</p>
+        </div>
+
+        <div>
+          <label for="jumlah" class="block text-xs font-semibold text-stone-700 mb-1.5">Jumlah Bantuan (Rp) <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400 font-medium">Rp</span>
+            <input type="text" id="jumlah" name="jumlah" inputmode="numeric" placeholder="0" autocomplete="off" required
+                   class="w-full rounded-lg border border-stone-300 bg-stone-50 pl-10 pr-3 py-2.5 text-sm text-stone-800 focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150" />
+          </div>
+          <p class="text-xs text-red-500 mt-1 hidden" id="err-jumlah">Masukkan jumlah bantuan</p>
+        </div>
+
+        <div>
+          <label for="nama" class="block text-xs font-semibold text-stone-700 mb-1.5">Nama Penerima <span class="text-red-500">*</span></label>
+          <input type="text" id="nama" name="nama" placeholder="Nama lengkap penerima manfaat" required autocomplete="off"
+                 class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150" />
+          <p class="text-xs text-red-500 mt-1 hidden" id="err-nama">Masukkan nama penerima</p>
+        </div>
+
+        <div>
+          <label for="alamat" class="block text-xs font-semibold text-stone-700 mb-1.5">Alamat <span class="text-red-500">*</span></label>
+          <textarea id="alamat" name="alamat" placeholder="RT / RW, Desa / Kelurahan, Kecamatan" rows="2" required autocomplete="off"
+                    class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 resize-none focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150"></textarea>
+          <p class="text-xs text-red-500 mt-1 hidden" id="err-alamat">Masukkan alamat penerima</p>
+        </div>
+
+        <div>
+          <label for="tanggal" class="block text-xs font-semibold text-stone-700 mb-1.5">Tanggal Penyerahan <span class="text-red-500">*</span></label>
+          <input type="date" id="tanggal" name="tanggal" required
+                 class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150" />
+          <p class="text-xs text-red-500 mt-1 hidden" id="err-tanggal">Pilih tanggal penyerahan</p>
+        </div>
+
+        <div>
+          <label for="verifikator" class="block text-xs font-semibold text-stone-700 mb-1.5">Nama Verifikator <span class="text-red-500">*</span></label>
+          <input type="text" id="verifikator" name="verifikator" placeholder="Nama lengkap verifikator" required autocomplete="off"
+                 class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150" />
+          <p class="text-xs text-red-500 mt-1 hidden" id="err-verifikator">Masukkan nama verifikator</p>
+        </div>
+
+        <div>
+          <label for="jabatan" class="block text-xs font-semibold text-stone-700 mb-1.5">Jabatan / Keterangan</label>
+          <input type="text" id="jabatan" name="jabatan" placeholder="Contoh: Verifikator Lapangan" autocomplete="off"
+                 class="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 focus:border-sip-600 focus:ring-2 focus:ring-sip-600/20 focus:outline-none transition duration-150" />
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" id="btnGenerate"
+                  class="w-full bg-sip-700 hover:bg-sip-800 active:bg-sip-900 text-white font-semibold text-sm py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sip-600/40 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m-7 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            Generate Laporan
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- RESULT -->
+    <div id="resultPanel" class="mt-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="px-4 sm:px-6 pt-5 pb-3 border-b border-stone-100 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-stone-800">Hasil Laporan</h2>
+            <p class="text-xs text-stone-400 mt-0.5">Salin dan kirim ke grup Telegram / WhatsApp</p>
+          </div>
+          <button id="btnCopy" type="button"
+                  class="inline-flex items-center gap-1.5 bg-sip-600 hover:bg-sip-700 active:bg-sip-800 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sip-600/40 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            <span id="copyLabel">Salin</span>
+          </button>
+        </div>
+        <div class="px-4 sm:px-6 py-5">
+          <div id="copyToast" class="hidden mb-3 bg-sip-50 border border-sip-200 text-sip-800 text-xs font-medium rounded-lg px-3 py-2 text-center">✅ Tersalin ke clipboard!</div>
+          <pre id="reportOutput" class="bg-stone-50 border border-stone-200 rounded-lg p-4 sm:p-5 text-xs sm:text-sm leading-relaxed font-mono text-stone-700 whitespace-pre-wrap overflow-x-auto select-all cursor-text"></pre>
+        </div>
+      </div>
+      <div class="mt-4 text-center no-print">
+        <button id="btnNewReport" type="button" class="text-xs text-stone-400 hover:text-stone-600 transition-colors underline underline-offset-2">← Buat laporan baru</button>
+      </div>
+    </div>
+
+    <footer class="mt-10 text-center text-xs text-stone-400 no-print">PENYALURAN Bantuan &mdash; v1.0.0</footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
