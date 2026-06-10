@@ -149,32 +149,25 @@
 
   /** Build the template string from form values */
   function buildReport(data) {
-    const line = '========================================';
-    const title = 'LAPORAN PENYERAHAN BANTUAN';
-    const subtitle = 'SIP - 2026';
-    const pad = 18; // label width for alignment
-
-    function line_(label, value) {
-      return label.padEnd(pad) + ': ' + value;
-    }
-
-    return [
-      line,
-      title.padStart(Math.floor((line.length + title.length) / 2)),
-      subtitle.padStart(Math.floor((line.length + subtitle.length) / 2)),
-      line,
+    var lines = [
+      'Penyerahan bantuan',
+      '📝 LAPORAN PENYERAHAN BANTUAN',
       '',
-      line_('Jenis Bantuan', data.jenis),
-      line_('Jumlah Bantuan', 'Rp ' + data.jumlah),
-      line_('Nama Penerima', data.nama),
-      line_('Alamat', data.alamat),
-      line_('Tanggal Serah', data.tanggal),
+      '🗒Jenis Bantuan : ' + data.jenis,
       '',
-      line_('Verifikator', data.verifikator),
-      line_('Jabatan', data.jabatan || '-'),
+      '💰 Jumlah : Rp. ' + data.jumlah + ',-',
       '',
-      line,
-    ].join('\n');
+      '👤 Penerima : ' + data.nama,
+      '',
+      '🏡 Alamat : ' + data.alamat,
+      '',
+      '📆 Tanggal Penyerahan : ' + data.tanggal,
+      '',
+      '✍ Yang menyerahkan :',
+      data.verifikator,
+      data.jabatan || '',
+    ];
+    return lines.join('\n');
   }
 
   function generateReport() {
