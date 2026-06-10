@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIP — PENGAJUAN Bantuan</title>
+  <meta name="description" content="Form pengajuan bantuan SIP/LAZSIP" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+          colors: {
+            sky: { 50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',400:'#38bdf8',500:'#0ea5e9',600:'#0284c7',700:'#0369a1',800:'#075985' },
+            sip: { 50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="logo-sip.png" />
+  <style>
+    @media print { .no-print { display: none; } }
+    .result-enter { opacity: 0; transform: translateY(8px); }
+    .result-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  </style>
+</head>
+<body class="bg-stone-50 font-body text-stone-800 antialiased min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white border-b border-sky-400 no-print sticky top-0 z-10">
+  <div class="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
+    <img src="logo-sip.png" alt="SIP Logo" class="w-9 h-9 rounded-full object-cover shrink-0" />
+    <div class="min-w-0 flex-1">
+      <h1 class="text-sm font-bold text-stone-900 truncate">PENGAJUAN Bantuan</h1>
+      <p class="text-xs text-stone-500">Form Pengajuan Calon Penerima Manfaat</p>
+    </div>
+    <a href="index.html" class="text-xs text-stone-400 hover:text-stone-600 underline shrink-0">Kembali</a>
+  </div>
+</header>
+
+<main class="max-w-lg mx-auto px-4 pt-6 pb-20">
+
+  <div class="bg-white rounded-xl shadow-sm border border-sky-200 overflow-hidden">
+    <div class="px-4 sm:px-6 pt-5 pb-3 border-b border-sky-100 bg-sky-50/50">
+      <h2 class="text-base font-bold text-stone-800">🔰 Form PENGAJUAN Bantuan SIP/LAZSIP</h2>
+      <p class="text-xs text-stone-400 mt-0.5">📝 Data Pemohon Calon Penerima Manfaat / Mustahiq</p>
+    </div>
+
+    <form id="pengajuanForm" class="px-4 sm:px-6 pt-4 pb-5 space-y-4" novalidate>
+
+      <!-- SECTION 1: Data Pemohon -->
+      <div class="bg-stone-50 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 border-y border-stone-200">
+        <h3 class="text-xs font-bold text-stone-600 uppercase tracking-wider">📋 Data Pemohon</h3>
+      </div>
+
+      <!-- 1 -->
+      <div>
+        <label for="f1_nama" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣ Nama <span class="text-red-500">*</span></label>
+        <input type="text" id="f1_nama" required autocomplete="off" placeholder="Nama lengkap"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        <p class="text-xs text-red-500 mt-1 hidden err">Masukkan nama</p>
+      </div>
+
+      <!-- 2 -->
+      <div>
+        <label for="f2_nik" class="block text-xs font-semibold text-stone-700 mb-1.5">2️⃣ NIK <span class="text-red-500">*</span></label>
+        <input type="text" id="f2_nik" inputmode="numeric" required autocomplete="off" placeholder="16 digit NIK"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        <p class="text-xs text-red-500 mt-1 hidden err">Masukkan NIK</p>
+      </div>
+
+      <!-- 3 -->
+      <div>
+        <label for="f3_ttl" class="block text-xs font-semibold text-stone-700 mb-1.5">3️⃣ Tempat Tanggal Lahir</label>
+        <input type="text" id="f3_ttl" autocomplete="off" placeholder="Contoh: Jakarta, 17 Agustus 1990"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+      </div>
+
+      <!-- 4 -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="f4_usia" class="block text-xs font-semibold text-stone-700 mb-1.5">4️⃣ Usia (tahun)</label>
+          <input type="text" id="f4_usia" inputmode="numeric" placeholder="45"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
+        <div>
+          <label for="f4_kelamin" class="block text-xs font-semibold text-stone-700 mb-1.5">&nbsp;</label>
+          <select id="f4_kelamin"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+            <option value="">Pilih...</option>
+            <option value="Laki Laki">Laki Laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div>
+        <label for="f5_status" class="block text-xs font-semibold text-stone-700 mb-1.5">5️⃣ Status</label>
+        <select id="f5_status"
+                class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+          <option value="">Pilih status...</option>
+          <option value="Menikah">Menikah</option>
+          <option value="Duda">Duda</option>
+          <option value="Janda">Janda</option>
+          <option value="Janda Mati">Janda Mati</option>
+        </select>
+      </div>
+
+      <!-- 6 -->
+      <div>
+        <label for="f6_alamat" class="block text-xs font-semibold text-stone-700 mb-1.5">6️⃣ Alamat Lengkap Saat Ini <span class="text-red-500">*</span></label>
+        <textarea id="f6_alamat" rows="2" required placeholder="RT/RW, Dusun, Desa/Kelurahan, Kecamatan, Kota/Kabupaten"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+        <p class="text-xs text-red-500 mt-1 hidden err">Masukkan alamat</p>
+      </div>
+
+      <!-- 7+8 -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="f7_tempat_tinggal" class="block text-xs font-semibold text-stone-700 mb-1.5">7️⃣ Status Tempat Tinggal</label>
+          <select id="f7_tempat_tinggal"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+            <option value="">Pilih...</option>
+            <option value="Milik Sendiri">Milik Sendiri</option>
+            <option value="Kontrak">Kontrak</option>
+            <option value="Sewa">Sewa</option>
+            <option value="Numpang/Ngontrak">Numpang/Ngontrak</option>
+            <option value="Rumah Dinas">Rumah Dinas</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div>
+          <label for="f8_biaya_sewa" class="block text-xs font-semibold text-stone-700 mb-1.5">8️⃣ Biaya Sewa</label>
+          <input type="text" id="f8_biaya_sewa" placeholder="Rp ... /Bulan"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div>
+        <label for="f9_pekerjaan" class="block text-xs font-semibold text-stone-700 mb-1.5">9️⃣ Pekerjaan</label>
+        <input type="text" id="f9_pekerjaan" placeholder="Contoh: Buruh harian, Pedagang, dll"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+      </div>
+
+      <!-- 10 -->
+      <div>
+        <label for="f10_penghasilan" class="block text-xs font-semibold text-stone-700 mb-1.5">🔟 Penghasilan</label>
+        <input type="text" id="f10_penghasilan" placeholder="Contoh: Rp 50.000 /hari"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+      </div>
+
+      <!-- 11 -->
+      <div>
+        <label for="f11_tanggungan" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣1️⃣ Jumlah Tanggungan (Rincikan)</label>
+        <textarea id="f11_tanggungan" rows="2" placeholder="Contoh: 3 anak (SD, SMP, SMA), 1 istri"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+      </div>
+
+      <!-- 12 -->
+      <div>
+        <label for="f12_hp" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣2️⃣ No. HP yang bisa dihubungi <span class="text-red-500">*</span></label>
+        <input type="text" id="f12_hp" inputmode="tel" required placeholder="08xxxxxxxxxx"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        <p class="text-xs text-red-500 mt-1 hidden err">Masukkan No. HP</p>
+      </div>
+
+      <!-- SECTION 2: Kondisi -->
+      <div class="bg-stone-50 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 border-y border-stone-200">
+        <h3 class="text-xs font-bold text-stone-600 uppercase tracking-wider">📝 Kondisi &amp; Keterangan</h3>
+      </div>
+
+      <!-- 13+14 -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="f13_sholat" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣3️⃣ Sholat 5 Waktu</label>
+          <select id="f13_sholat"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+            <option value="">Pilih...</option>
+            <option value="Ya">Ya</option>
+            <option value="Jarang">Jarang</option>
+            <option value="Tidak">Tidak</option>
+          </select>
+        </div>
+        <div>
+          <label for="f14_merokok" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣4️⃣ Merokok</label>
+          <select id="f14_merokok"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+            <option value="">Pilih...</option>
+            <option value="Ya">Ya</option>
+            <option value="Jarang">Jarang</option>
+            <option value="Tidak">Tidak</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 15 -->
+      <div>
+        <label for="f15_dibantu" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣5️⃣ Apakah sudah pernah dibantu SIP/LAZSIP / Lembaga lain</label>
+        <textarea id="f15_dibantu" rows="2" placeholder="Jelaskan jika pernah"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+      </div>
+
+      <!-- 16+17 -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="f16_publikasi" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣6️⃣ Bersedia dipublikasi</label>
+          <select id="f16_publikasi"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+            <option value="">Pilih...</option>
+            <option value="Ya">Ya</option>
+            <option value="Tidak">Tidak</option>
+          </select>
+        </div>
+        <div>
+          <label for="f17_sktm" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣7️⃣ Bersedia Mengurus SKTM</label>
+          <select id="f17_sktm"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150">
+            <option value="">Pilih...</option>
+            <option value="Ya">Ya</option>
+            <option value="Tidak">Tidak</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 18 -->
+      <div>
+        <label for="f18_info" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣8️⃣ Asal mendapat informasi tentang SIP/LAZSIP</label>
+        <input type="text" id="f18_info" placeholder="Contoh: Teman, Media sosial, Rodja"
+               class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+      </div>
+
+      <!-- 19 -->
+      <div>
+        <label for="f19_masalah" class="block text-xs font-semibold text-stone-700 mb-1.5">1️⃣9️⃣ Masalah yang dihadapi</label>
+        <textarea id="f19_masalah" rows="4" placeholder="Jelaskan masalah yang dihadapi secara detail"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+      </div>
+
+      <!-- FOOTER: Data Pelapor -->
+      <div class="bg-stone-50 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 border-y border-stone-200">
+        <h3 class="text-xs font-bold text-stone-600 uppercase tracking-wider">📝 Data Pelapor</h3>
+      </div>
+
+      <div>
+        <label for="f_data_pelapor" class="block text-xs font-semibold text-stone-700 mb-1.5">📝 Data Pelapor</label>
+        <textarea id="f_data_pelapor" rows="2" placeholder="Contoh: Datang langsung ke kantor, diantar relawan, dll"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="pt-2">
+        <button type="submit" id="btnGenerate"
+                class="w-full bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-sm py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/40 transition-all duration-150 flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m-7 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          Generate Pengajuan
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultPanel" class="mt-6 hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-sky-200 overflow-hidden">
+      <div class="px-4 sm:px-6 pt-5 pb-3 border-b border-sky-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-stone-800">Hasil Pengajuan</h2>
+          <p class="text-xs text-stone-400 mt-0.5">Salin dan laporkan ke koordinator</p>
+        </div>
+        <button id="btnCopy" type="button"
+                class="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/40 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          <span id="copyLabel">Salin</span>
+        </button>
+      </div>
+      <div class="px-4 sm:px-6 py-5">
+        <div id="copyToast" class="hidden mb-3 bg-sky-50 border border-sky-200 text-sky-800 text-xs font-medium rounded-lg px-3 py-2 text-center">✅ Tersalin ke clipboard!</div>
+        <pre id="reportOutput" class="bg-stone-50 border border-stone-200 rounded-lg p-4 sm:p-5 text-xs sm:text-sm leading-relaxed font-mono text-stone-700 whitespace-pre-wrap overflow-x-auto select-all cursor-text"></pre>
+      </div>
+    </div>
+    <div class="mt-4 text-center no-print">
+      <button id="btnNewReport" type="button" class="text-xs text-stone-400 hover:text-stone-600 transition-colors underline underline-offset-2">← Buat pengajuan baru</button>
+    </div>
+  </div>
+
+  <footer class="mt-10 text-center text-xs text-stone-400 no-print">PENGAJUAN Bantuan &mdash; v1.0.0</footer>
+</main>
+
+<script>
+(function() {
+  'use strict';
+
+  var MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  var DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    var parts = iso.split('-');
+    var d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+    return DAYS[d.getDay()] + ', ' + parseInt(parts[2],10) + ' ' + MONTHS[parseInt(parts[1],10)-1] + ' ' + parts[0];
+  }
+
+  function val(id) {
+    var el = document.getElementById(id);
+    if (!el) return '';
+    return el.value.trim();
+  }
+
+  function opt(id) {
+    var v = val(id);
+    return v || '-';
+  }
+
+  // Required fields
+  var required = ['f1_nama','f2_nik','f6_alamat','f12_hp'];
+
+  function validate() {
+    var all = true;
+    required.forEach(function(id) {
+      var el = document.getElementById(id);
+      var err = el.parentNode.querySelector('.err');
+      if (!el.value.trim()) {
+        el.classList.add('border-red-400','bg-red-50');
+        el.classList.remove('border-stone-300','bg-white');
+        if (err) err.classList.remove('hidden');
+        all = false;
+      } else {
+        el.classList.remove('border-red-400','bg-red-50');
+        el.classList.add('border-stone-300','bg-white');
+        if (err) err.classList.add('hidden');
+      }
+    });
+    return all;
+  }
+
+  function buildReport() {
+    if (!validate()) {
+      var firstErr = document.querySelector('.border-red-400');
+      if (firstErr) firstErr.focus();
+      return null;
+    }
+
+    return [
+      '🔰 PENGAJUAN BANTUAN SIP/LAZSIP',
+      '',
+      '📝 DATA PEMOHON',
+      '━━━━━━━━━━━━━━━━━━━━',
+      '1️⃣ Nama                  : ' + val('f1_nama'),
+      '2️⃣ NIK                   : ' + val('f2_nik'),
+      '3️⃣ Tempat, Tgl Lahir     : ' + opt('f3_ttl'),
+      '4️⃣ Usia & Jenis Kelamin  : ' + (val('f4_usia') || '-') + ' tahun, ' + (val('f4_kelamin') || '-'),
+      '5️⃣ Status                : ' + opt('f5_status'),
+      '6️⃣ Alamat                : ' + val('f6_alamat'),
+      '7️⃣ Status Tempat Tinggal : ' + opt('f7_tempat_tinggal'),
+      '8️⃣ Biaya Sewa            : ' + opt('f8_biaya_sewa'),
+      '9️⃣ Pekerjaan             : ' + opt('f9_pekerjaan'),
+      '🔟 Penghasilan            : ' + opt('f10_penghasilan'),
+      '1️⃣1️⃣ Tanggungan            : ' + opt('f11_tanggungan'),
+      '1️⃣2️⃣ No. HP               : ' + val('f12_hp'),
+      '',
+      '📝 KONDISI & KETERANGAN',
+      '━━━━━━━━━━━━━━━━━━━━',
+      '1️⃣3️⃣ Sholat 5 Waktu       : ' + opt('f13_sholat'),
+      '1️⃣4️⃣ Merokok               : ' + opt('f14_merokok'),
+      '1️⃣5️⃣ Dibantu Lembaga Lain : ' + opt('f15_dibantu'),
+      '1️⃣6️⃣ Bersedia Publikasi   : ' + opt('f16_publikasi'),
+      '1️⃣7️⃣ Bersedia SKTM        : ' + opt('f17_sktm'),
+      '1️⃣8️⃣ Info SIP/LAZSIP      : ' + opt('f18_info'),
+      '',
+      '📝 MASALAH YANG DIHADAPI',
+      '━━━━━━━━━━━━━━━━━━━━',
+      opt('f19_masalah'),
+      '',
+      '📝 DATA PELAPOR',
+      '━━━━━━━━━━━━━━━━━━━━',
+      opt('f_data_pelapor'),
+    ].join('\n');
+  }
+
+  var form = document.getElementById('pengajuanForm');
+  var panel = document.getElementById('resultPanel');
+  var output = document.getElementById('reportOutput');
+  var btnCopy = document.getElementById('btnCopy');
+  var copyLabel = document.getElementById('copyLabel');
+  var copyToast = document.getElementById('copyToast');
+  var btnNew = document.getElementById('btnNewReport');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var report = buildReport();
+    if (!report) return;
+
+    output.textContent = report;
+    panel.classList.remove('hidden');
+    panel.classList.add('result-enter');
+    requestAnimationFrame(function() {
+      panel.classList.add('result-enter-active');
+    });
+    setTimeout(function() {
+      panel.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 100);
+    copyLabel.textContent = 'Salin';
+    btnCopy.disabled = false;
+    copyToast.classList.add('hidden');
+  });
+
+  btnCopy.addEventListener('click', async function() {
+    var text = output.textContent;
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch(_) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    copyLabel.textContent = 'Tersalin!';
+    btnCopy.disabled = true;
+    copyToast.classList.remove('hidden');
+    setTimeout(function() { copyToast.classList.add('hidden'); }, 2500);
+  });
+
+  btnNew.addEventListener('click', function() {
+    form.reset();
+    panel.classList.add('hidden');
+    panel.classList.remove('result-enter','result-enter-active');
+    output.textContent = '';
+    copyLabel.textContent = 'Salin';
+    btnCopy.disabled = false;
+    copyToast.classList.add('hidden');
+    required.forEach(function(id) {
+      var el = document.getElementById(id);
+      el.classList.remove('border-red-400','bg-red-50');
+      el.classList.add('border-stone-300','bg-white');
+      var err = el.parentNode.querySelector('.err');
+      if (err) err.classList.add('hidden');
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+})();
+</script>
+</body>
+</html>
