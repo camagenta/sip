@@ -506,19 +506,13 @@
 
       statusText.textContent = 'Menghitung rute...';
 
-      // Coba routing real via OSRM, fallback ke Haversine
+      // Routing via OSRM — tanpa fallback
       var route = await osrmRoute(userPos.lat, userPos.lng, geo.lat, geo.lng);
-      var distKm, timeMotor, timeCar;
+      if (!route) throw new Error('OSRM tidak bisa menghitung rute. Coba lagi nanti.');
 
-      if (route) {
-        distKm    = route.distanceM / 1000;
-        timeCar   = Math.round(route.durationS / 60);
-        timeMotor = Math.round(distKm / 40 * 60);
-      } else {
-        distKm    = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
-        timeMotor = Math.round(distKm / 40 * 60);
-        timeCar   = Math.round(distKm / 30 * 60);
-      }
+      var distKm = route.distanceM / 1000;
+      var timeCar = Math.round(route.durationS / 60);
+      var timeMotor = Math.round(distKm / 40 * 60);
 
       updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, alamat);
 
