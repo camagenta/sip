@@ -676,17 +676,6 @@
   var mapInstance = null;
   var mapMarkers  = [];
 
-  // Haversine: hitung jarak garis lurus (km)
-  function haversineKm(lat1, lon1, lat2, lon2) {
-    var R = 6371;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLon = (lon2 - lon1) * Math.PI / 180;
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
   // Ambil nama jalan — split koma dulu, baru strip detail (RT/RW/No/Blok/dll)
   function extractStreetName(alamat) {
     var first = alamat.split(',')[0].trim();
@@ -784,7 +773,7 @@
   }
 
   // Init / update map
-  function updateMap(userLat, userLng, pemohonLat, pemohonLng, alamat) {
+  function updateMap(userLat, userLng, pemohonLat, pemohonLng, routeCoords, alamat) {
     if (!mapInstance) {
       mapInstance = L.map('map', { zoomControl: true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -814,31 +803,34 @@
         .bindPopup('<b>📌 Pemohon</b><br/>' + alamat.substring(0, 60))
     );
 
-    var line = L.polyline([[userLat, userLng], [pemohonLat, pemohonLng]], {
-      color: '#d97706', weight: 2, dashArray: '6,8', opacity: 0.7
+    // Route polyline dari OSRM (ikuti jalan, bukan garis lurus)
+    var line = L.polyline(routeCoords, {
+      color: '#d97706', weight: 3, opacity: 0.8
     }).addTo(mapInstance);
     mapMarkers.push(line);
 
-    mapInstance.fitBounds([[userLat, userLng], [pemohonLat, pemohonLng]], {
-      padding: [30, 30], maxZoom: 15
+    mapInstance.fitBounds(line.getBounds(), {
+      padding: [40, 40], maxZoom: 15
     });
 
-    // Fix map size if container was hidden
     setTimeout(function() { mapInstance.invalidateSize(); }, 150);
   }
 
-  // Route real via OSRM (gratis, tanpa API key — pakai data OSM)
+  // Route real via OSRM — dengan geometry rute
   async function osrmRoute(fromLat, fromLng, toLat, toLng) {
-    try {
-      var url = 'https://router.project-osrm.org/route/v1/driving/' +
-        fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=false';
-      var resp = await fetch(url, { headers: { 'User-Agent': 'SIP-Verifikator/1.0' } });
-      var data = await resp.json();
-      if (data && data.code === 'Ok' && data.routes && data.routes.length > 0) {
-        return { distanceM: data.routes[0].distance, durationS: data.routes[0].duration };
-      }
-    } catch (e) {}
-    return null;
+    var url = 'https://router.project-osrm.org/route/v1/driving/' +
+      fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=full&geometries=geojson';
+    var resp = await fetch(url, { headers: { 'User-Agent': 'SIP-Verifikator/1.0' } });
+    var data = await resp.json();
+    if (data && data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      var r = data.routes[0];
+      return {
+        distanceM: r.distance,
+        durationS: r.duration,
+        coords: r.geometry.coordinates.map(function(c) { return [c[1], c[0]]; })
+      };
+    }
+    throw new Error('OSRM tidak bisa menghitung rute. Coba lagi nanti.');
   }
 
   // Format menit ke teks
@@ -879,21 +871,14 @@
 
       statusText.textContent = 'Menghitung rute...';
 
-      // Coba routing real via OSRM, fallback ke Haversine kalo gagal
+      // Routing via OSRM
       var route = await osrmRoute(userPos.lat, userPos.lng, geo.lat, geo.lng);
-      var distKm, timeMotor, timeCar;
 
-      if (route) {
-        distKm    = route.distanceM / 1000;
-        timeCar   = Math.round(route.durationS / 60);
-        timeMotor = Math.round(distKm / 40 * 60); // motor lebih gesit di kota
-      } else {
-        distKm    = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
-        timeMotor = Math.round(distKm / 40 * 60);
-        timeCar   = Math.round(distKm / 30 * 60);
-      }
+      var distKm = route.distanceM / 1000;
+      var timeCar = Math.round(route.durationS / 60);
+      var timeMotor = Math.round(distKm / 40 * 60);
 
-      updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, alamat);
+      updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, route.coords, alamat);
 
       locAddress.textContent = geo.display;
       locDistance.textContent = distKm < 1 ? (distKm * 1000).toFixed(0) + ' m' : distKm.toFixed(1) + ' km';
