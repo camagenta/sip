@@ -688,11 +688,12 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Ambil nama jalan — potong di RT/RW/No/Blok/Gang/Kel/Kec
+  // Ambil nama jalan — split koma dulu, baru strip detail (RT/RW/No/Blok/dll)
   function extractStreetName(alamat) {
-    var m = alamat.match(/^(.+?)\b(?:\s*(?:r[tw]\s*\d+|no\.?\s*\d+|blok|gg|gang|kel\b|kec\b))/i);
-    if (m) return m[1].replace(/[,;]+$/, '').trim();
-    return alamat.split(',')[0].replace(/[,;\s]+$/, '').trim();
+    var first = alamat.split(',')[0].trim();
+    var m = first.match(/^(.+?)\b(?:\s*(?:r[tw]\s*\d+|no\.?\s*[\da-zA-Z]+|blok|gg|gang|kel\b|kec\b))/i);
+    if (m) return m[1].replace(/[,;\s]+$/, '').trim();
+    return first.replace(/[,;\s]+$/, '').trim();
   }
 
   // Ambil kodepos 5 digit dari alamat
