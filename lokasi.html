@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIP — CEK LOKASI Pemohon</title>
+  <meta name="description" content="Cek lokasi dan jarak pemohon dari posisi verifikator" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+          colors: {
+            sip: { 50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b' },
+            teal: { 50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',300:'#5eead4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="logo-sip.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <style>
+    @media print { .no-print { display: none; } }
+    .result-enter { opacity: 0; transform: translateY(8px); }
+    .result-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body class="bg-stone-50 font-body text-stone-800 antialiased min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white border-b border-teal-400 no-print sticky top-0 z-10">
+  <div class="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
+    <img src="logo-sip.png" alt="SIP Logo" class="w-9 h-9 rounded-full object-cover shrink-0" />
+    <div class="min-w-0 flex-1">
+      <h1 class="text-sm font-bold text-stone-900 truncate">CEK LOKASI</h1>
+      <p class="text-xs text-stone-500">Deteksi Lokasi Pemohon &amp; Jarak dari Verifikator</p>
+    </div>
+    <a href="index.html" class="text-xs text-stone-400 hover:text-stone-600 underline shrink-0">Kembali</a>
+  </div>
+</header>
+
+<main class="max-w-lg mx-auto px-4 pt-6 pb-20">
+
+  <!-- FORM CARD -->
+  <div class="bg-white rounded-xl shadow-sm border border-teal-200 overflow-hidden">
+    <div class="px-4 sm:px-6 pt-5 pb-3 border-b border-teal-100 bg-teal-50/50">
+      <h2 class="text-base font-bold text-stone-800">📍 Cek Lokasi Pemohon</h2>
+      <p class="text-xs text-stone-400 mt-0.5">Masukkan alamat pemohon, lalu deteksi posisi dan jarak dari lokasi kamu</p>
+    </div>
+
+    <div class="px-4 sm:px-6 pt-4 pb-5 space-y-4">
+
+      <!-- Alamat Input -->
+      <div>
+        <label for="f_alamat" class="block text-xs font-semibold text-stone-700 mb-1.5">Alamat Pemohon <span class="text-red-500">*</span></label>
+        <textarea id="f_alamat" rows="3" required placeholder="RT/RW, Dusun, Desa/Kelurahan, Kecamatan, Kota/Kabupaten"
+                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none transition duration-150"></textarea>
+        <p class="text-xs text-red-500 mt-1 hidden" id="errAlamat">Masukkan alamat pemohon</p>
+      </div>
+
+      <!-- Cek Lokasi Button -->
+      <button type="button" id="btnCekLokasi"
+              class="w-full bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-bold text-sm py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500/40 transition-all duration-150 flex items-center justify-center gap-2">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        🔍 Cek Lokasi
+      </button>
+
+      <!-- Location Results (hidden initially) -->
+      <div id="locationPanel" class="hidden space-y-3">
+        <!-- Status -->
+        <div id="locStatus" class="hidden text-xs text-stone-500 bg-stone-50 rounded-lg border border-stone-200 px-3 py-2 flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          <span id="locStatusText">Memproses...</span>
+        </div>
+
+        <!-- Map -->
+        <div id="map" class="rounded-lg border border-stone-300 bg-stone-100" style="height: 220px; min-height: 220px;"></div>
+
+        <!-- Result card -->
+        <div id="locResult" class="hidden bg-teal-50 border border-teal-200 rounded-lg p-3 space-y-2">
+          <p class="text-xs font-bold text-teal-800 flex items-center gap-1">📍 Hasil Deteksi Lokasi</p>
+          <p id="locAddress" class="text-xs text-stone-500 leading-relaxed"></p>
+          <div class="grid grid-cols-3 gap-2 pt-1">
+            <div class="bg-white rounded-lg px-2 py-2 text-center border border-teal-100">
+              <p class="text-lg font-bold text-teal-700" id="locDistance">-</p>
+              <p class="text-[10px] text-stone-400">Jarak</p>
+            </div>
+            <div class="bg-white rounded-lg px-2 py-2 text-center border border-teal-100">
+              <p class="text-lg font-bold text-teal-700" id="locTimeMotor">-</p>
+              <p class="text-[10px] text-stone-400">🛵 Motor</p>
+            </div>
+            <div class="bg-white rounded-lg px-2 py-2 text-center border border-teal-100">
+              <p class="text-lg font-bold text-teal-700" id="locTimeCar">-</p>
+              <p class="text-[10px] text-stone-400">🚗 Mobil</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div id="locError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+      </div>
+
+      <!-- Info -->
+      <div class="bg-stone-50 rounded-lg border border-stone-200 px-3 py-2.5">
+        <p class="text-xs text-stone-400 leading-relaxed">
+          💡 <strong>Cara penggunaan:</strong> Masukkan alamat lengkap pemohon, lalu tekan tombol "Cek Lokasi".
+          Browser akan meminta izin akses lokasi — izinkan untuk mendeteksi posisi kamu.
+          Jarak dan perkiraan waktu tempuh akan dihitung secara otomatis.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="mt-10 text-center text-xs text-stone-400 no-print">CEK LOKASI &mdash; v1.0.0</footer>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/* =========================================================
+ * LOKASI — Geolocation, Geocoding, Jarak & Peta
+ * ========================================================= */
+(function() {
+  'use strict';
+
+  var alamatInput = document.getElementById('f_alamat');
+  var errAlamat   = document.getElementById('errAlamat');
+  var btnCek      = document.getElementById('btnCekLokasi');
+  if (!btnCek) return;
+
+  var panel       = document.getElementById('locationPanel');
+  var statusEl    = document.getElementById('locStatus');
+  var statusText  = document.getElementById('locStatusText');
+  var errorEl     = document.getElementById('locError');
+  var resultEl    = document.getElementById('locResult');
+  var mapEl       = document.getElementById('map');
+  var locAddress  = document.getElementById('locAddress');
+  var locDistance = document.getElementById('locDistance');
+  var locTimeMotor = document.getElementById('locTimeMotor');
+  var locTimeCar  = document.getElementById('locTimeCar');
+
+  var mapInstance = null;
+  var mapMarkers  = [];
+
+  // Haversine: hitung jarak garis lurus (km)
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // Ambil nama jalan — split koma dulu, baru strip detail (RT/RW/No/Blok/dll)
+  function extractStreetName(alamat) {
+    var first = alamat.split(',')[0].trim();
+    var m = first.match(/^(.+?)\b(?:\s*(?:r[tw]\s*\d+|no\.?\s*[\da-zA-Z]+|blok|gg|gang|kel\b|kec\b))/i);
+    if (m) return m[1].replace(/[,;\s]+$/, '').trim();
+    return first.replace(/[,;\s]+$/, '').trim();
+  }
+
+  // Ambil kodepos 5 digit dari alamat
+  function extractPostcode(alamat) {
+    var m = alamat.match(/\b(\d{5})\b/);
+    return m ? m[1] : null;
+  }
+
+  // Helper: fetch Nominatim, return {lat,lng,display} or null
+  async function nominatimFetch(params) {
+    var url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams(params);
+    var resp = await fetch(url, { headers: { 'User-Agent': 'SIP-Verifikator/1.0' } });
+    var json = await resp.json();
+    if (json && json.length > 0) {
+      return {
+        lat: parseFloat(json[0].lat),
+        lng: parseFloat(json[0].lon),
+        display: json[0].display_name
+      };
+    }
+    return null;
+  }
+
+  // Geocode alamat via structured query + fallback
+  async function geocodeAlamat(alamat) {
+    var street = extractStreetName(alamat);
+    var postcode = extractPostcode(alamat);
+    var result;
+
+    // 1) Structured dengan postalcode
+    if (postcode) {
+      result = await nominatimFetch({
+        street: street,
+        country: 'Indonesia',
+        postalcode: postcode,
+        format: 'json',
+        limit: '1'
+      });
+      if (result) return result;
+    }
+
+    // 2) Structured tanpa postalcode
+    result = await nominatimFetch({
+      street: street,
+      country: 'Indonesia',
+      format: 'json',
+      limit: '1'
+    });
+    if (result) return result;
+
+    // 3) Free-form fallback
+    result = await nominatimFetch({
+      q: street + ', Indonesia',
+      format: 'json',
+      limit: '1'
+    });
+    if (result) return result;
+
+    throw new Error('Alamat tidak ditemukan. Coba tulis nama jalan + kota.');
+  }
+
+  // Ambil posisi user via GPS browser
+  function getUserPosition() {
+    return new Promise(function(resolve, reject) {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation tidak didukung browser ini'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        function(err) {
+          var msg = '';
+          switch (err.code) {
+            case 1: msg = 'Izinkan akses lokasi di browser untuk fitur ini'; break;
+            case 2: msg = 'Lokasi tidak tersedia. Coba aktifkan GPS.'; break;
+            case 3: msg = 'Waktu permintaan lokasi habis. Coba lagi.'; break;
+            default: msg = 'Gagal mendapatkan lokasi';
+          }
+          reject(new Error(msg));
+        },
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
+    });
+  }
+
+  // Init / update map
+  function updateMap(userLat, userLng, pemohonLat, pemohonLng, alamat) {
+    if (!mapInstance) {
+      mapInstance = L.map('map', { zoomControl: true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 19
+      }).addTo(mapInstance);
+    }
+
+    mapMarkers.forEach(function(m) { mapInstance.removeLayer(m); });
+    mapMarkers = [];
+
+    var myIcon = L.divIcon({
+      html: '<div style="background:#14b8a6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">📍</div>',
+      className: '', iconSize: [28, 28], iconAnchor: [14, 14]
+    });
+    mapMarkers.push(
+      L.marker([userLat, userLng], { icon: myIcon }).addTo(mapInstance)
+        .bindPopup('<b>📍 Posisi Saya</b>')
+    );
+
+    var pinIcon = L.divIcon({
+      html: '<div style="background:#0d9488;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">📌</div>',
+      className: '', iconSize: [28, 28], iconAnchor: [14, 14]
+    });
+    mapMarkers.push(
+      L.marker([pemohonLat, pemohonLng], { icon: pinIcon }).addTo(mapInstance)
+        .bindPopup('<b>📌 Pemohon</b><br/>' + alamat.substring(0, 60))
+    );
+
+    var line = L.polyline([[userLat, userLng], [pemohonLat, pemohonLng]], {
+      color: '#0d9488', weight: 2, dashArray: '6,8', opacity: 0.7
+    }).addTo(mapInstance);
+    mapMarkers.push(line);
+
+    mapInstance.fitBounds([[userLat, userLng], [pemohonLat, pemohonLng]], {
+      padding: [30, 30], maxZoom: 15
+    });
+
+    setTimeout(function() { mapInstance.invalidateSize(); }, 150);
+  }
+
+  // Route real via OSRM
+  async function osrmRoute(fromLat, fromLng, toLat, toLng) {
+    try {
+      var url = 'https://router.project-osrm.org/route/v1/driving/' +
+        fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=false';
+      var resp = await fetch(url, { headers: { 'User-Agent': 'SIP-Verifikator/1.0' } });
+      var data = await resp.json();
+      if (data && data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        return { distanceM: data.routes[0].distance, durationS: data.routes[0].duration };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  // Format menit ke teks
+  function formatMenit(total) {
+    if (total < 60) return '~' + total + ' mnt';
+    var jam = Math.floor(total / 60);
+    var mnt = total % 60;
+    return '~' + jam + ' jam ' + (mnt > 0 ? mnt + ' mnt' : '');
+  }
+
+  // Validate alamat
+  function validateAlamat() {
+    var v = alamatInput.value.trim();
+    if (!v) {
+      alamatInput.classList.add('border-red-400', 'bg-red-50');
+      alamatInput.classList.remove('border-stone-300', 'bg-white');
+      errAlamat.classList.remove('hidden');
+      return false;
+    }
+    alamatInput.classList.remove('border-red-400', 'bg-red-50');
+    alamatInput.classList.add('border-stone-300', 'bg-white');
+    errAlamat.classList.add('hidden');
+    return true;
+  }
+
+  // Clear error styling on input
+  alamatInput.addEventListener('input', function() {
+    if (this.value.trim()) {
+      this.classList.remove('border-red-400', 'bg-red-50');
+      this.classList.add('border-stone-300', 'bg-white');
+      errAlamat.classList.add('hidden');
+    }
+  });
+
+  // Main action
+  btnCek.addEventListener('click', async function() {
+    if (!validateAlamat()) {
+      alamatInput.focus();
+      return;
+    }
+
+    var alamat = alamatInput.value.trim();
+
+    panel.classList.remove('hidden');
+
+    statusEl.classList.remove('hidden');
+    statusText.textContent = 'Mendapatkan posisi kamu...';
+    errorEl.classList.add('hidden');
+    resultEl.classList.add('hidden');
+
+    // Scroll ke panel di mobile
+    setTimeout(function() {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+
+    try {
+      var userPos = await getUserPosition();
+
+      statusText.textContent = 'Mencari alamat...';
+      var geo = await geocodeAlamat(alamat);
+
+      statusText.textContent = 'Menghitung rute...';
+
+      // Coba routing real via OSRM, fallback ke Haversine
+      var route = await osrmRoute(userPos.lat, userPos.lng, geo.lat, geo.lng);
+      var distKm, timeMotor, timeCar;
+
+      if (route) {
+        distKm    = route.distanceM / 1000;
+        timeCar   = Math.round(route.durationS / 60);
+        timeMotor = Math.round(distKm / 40 * 60);
+      } else {
+        distKm    = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
+        timeMotor = Math.round(distKm / 40 * 60);
+        timeCar   = Math.round(distKm / 30 * 60);
+      }
+
+      updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, alamat);
+
+      locAddress.textContent = geo.display;
+      locDistance.textContent = distKm < 1 ? (distKm * 1000).toFixed(0) + ' m' : distKm.toFixed(1) + ' km';
+      locTimeMotor.textContent = formatMenit(timeMotor);
+      locTimeCar.textContent = formatMenit(timeCar);
+
+      statusEl.classList.add('hidden');
+      resultEl.classList.remove('hidden');
+
+    } catch (err) {
+      statusEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorEl.textContent = '❌ ' + err.message;
+    }
+  });
+})();
+</script>
+</body>
+</html>
