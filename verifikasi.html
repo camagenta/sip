@@ -875,10 +875,8 @@
       var route = await osrmRoute(userPos.lat, userPos.lng, geo.lat, geo.lng);
 
       var distKm = route.distanceM / 1000;
-      var timeCar = Math.round(route.durationS / 60);
-      var avgSpeed = timeCar > 0 ? distKm / (timeCar / 60) : 30;
-      var motorSpeed = Math.max(Math.round(avgSpeed * 1.3), 45);
-      var timeMotor = Math.round(distKm / motorSpeed * 60);
+      var timeCar = Math.round(distKm / 30 * 60);
+      var timeMotor = Math.round(distKm / 39 * 60);
 
       updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, route.coords, alamat);
 
