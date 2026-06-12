@@ -164,8 +164,8 @@
               <p class="text-[10px] text-stone-400">🛵 Motor</p>
             </div>
             <div class="bg-white rounded-lg px-2 py-2 text-center border border-amber-100">
-              <p class="text-lg font-bold text-amber-700" id="locTimeWalk">-</p>
-              <p class="text-[10px] text-stone-400">🚶 Jalan</p>
+              <p class="text-lg font-bold text-amber-700" id="locTimeCar">-</p>
+              <p class="text-[10px] text-stone-400">🚗 Mobil</p>
             </div>
           </div>
         </div>
@@ -672,7 +672,7 @@
   var locAddress  = document.getElementById('locAddress');
   var locDistance = document.getElementById('locDistance');
   var locTimeMotor = document.getElementById('locTimeMotor');
-  var locTimeWalk  = document.getElementById('locTimeWalk');
+  var locTimeCar  = document.getElementById('locTimeCar');
 
   var mapInstance = null;
   var mapMarkers  = [];
@@ -865,14 +865,14 @@
 
       var distKm = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
       var timeMotor = Math.round(distKm / 40 * 60);
-      var timeWalk  = Math.round(distKm / 5 * 60);
+      var timeCar   = Math.round(distKm / 30 * 60);
 
       updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, alamat);
 
       locAddress.textContent = geo.display;
       locDistance.textContent = distKm < 1 ? (distKm * 1000).toFixed(0) + ' m' : distKm.toFixed(1) + ' km';
       locTimeMotor.textContent = formatMenit(timeMotor);
-      locTimeWalk.textContent = formatMenit(timeWalk);
+      locTimeCar.textContent = formatMenit(timeCar);
 
       statusEl.classList.add('hidden');
       resultEl.classList.remove('hidden');
