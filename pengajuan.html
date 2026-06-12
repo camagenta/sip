@@ -249,10 +249,45 @@
         <h3 class="text-xs font-bold text-stone-600 uppercase tracking-wider">📝 Data Pelapor</h3>
       </div>
 
-      <div>
-        <label for="f_data_pelapor" class="block text-xs font-semibold text-stone-700 mb-1.5">📝 Data Pelapor</label>
-        <textarea id="f_data_pelapor" rows="2" placeholder="Contoh: Datang langsung ke kantor, diantar relawan, dll"
-                  class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+      <!-- Toggle -->
+      <div class="flex items-start gap-3">
+        <input type="checkbox" id="f_toggle_pelapor"
+               class="mt-0.5 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/20 focus:ring-2 transition" />
+        <label for="f_toggle_pelapor" class="text-xs font-semibold text-stone-700 cursor-pointer select-none">✅ Sertakan Data Pelapor</label>
+      </div>
+
+      <!-- Data Pelapor fields (hidden unless toggled) -->
+      <div id="dataPelaporFields" class="hidden space-y-4 pl-4 border-l-2 border-sky-200">
+        <div>
+          <label for="f_pel_nama" class="block text-xs font-semibold text-stone-700 mb-1.5">*️⃣ Nama</label>
+          <input type="text" id="f_pel_nama" autocomplete="off" placeholder="Nama pelapor"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
+        <div>
+          <label for="f_pel_status" class="block text-xs font-semibold text-stone-700 mb-1.5">*️⃣ Status</label>
+          <input type="text" id="f_pel_status" autocomplete="off" placeholder="Status pelapor"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
+        <div>
+          <label for="f_pel_lembaga" class="block text-xs font-semibold text-stone-700 mb-1.5">*️⃣ Yayasan/Lembaga/Perorangan</label>
+          <input type="text" id="f_pel_lembaga" autocomplete="off" placeholder="Nama yayasan/lembaga"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
+        <div>
+          <label for="f_pel_alamat" class="block text-xs font-semibold text-stone-700 mb-1.5">*️⃣ Alamat</label>
+          <textarea id="f_pel_alamat" rows="2" placeholder="Alamat pelapor"
+                    class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm resize-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150"></textarea>
+        </div>
+        <div>
+          <label for="f_pel_telp" class="block text-xs font-semibold text-stone-700 mb-1.5">*️⃣ No Telp</label>
+          <input type="text" id="f_pel_telp" inputmode="tel" placeholder="08xxxxxxxxxx"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
+        <div>
+          <label for="f_pel_program" class="block text-xs font-semibold text-stone-700 mb-1.5">*️⃣ Program Bantuan</label>
+          <input type="text" id="f_pel_program" autocomplete="off" placeholder="Jenis program bantuan"
+                 class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:outline-none transition duration-150" />
+        </div>
       </div>
 
       <!-- SUBMIT -->
@@ -348,7 +383,7 @@
       return null;
     }
 
-    return [
+    var lines = [
       '🔰 PENGAJUAN BANTUAN SIP/LAZSIP',
       '',
       '📝 DATA PEMOHON',
@@ -378,11 +413,24 @@
       '📝 MASALAH YANG DIHADAPI',
       '━━━━━━━━━━━━━━━━━━━━',
       opt('f19_masalah'),
-      '',
-      '📝 DATA PELAPOR',
-      '━━━━━━━━━━━━━━━━━━━━',
-      opt('f_data_pelapor'),
-    ].join('\n');
+    ];
+
+    var togglePelapor = document.getElementById('f_toggle_pelapor');
+    if (togglePelapor && togglePelapor.checked) {
+      lines.push(
+        '',
+        '📝 DATA PELAPOR',
+        '━━━━━━━━━━━━━━━━━━━━',
+        '*️⃣ Nama : ' + opt('f_pel_nama'),
+        '*️⃣ Status : ' + opt('f_pel_status'),
+        '*️⃣ Yayasan/Lembaga/Perorangan : ' + opt('f_pel_lembaga'),
+        '*️⃣ Alamat : ' + opt('f_pel_alamat'),
+        '*️⃣ No Telp : ' + opt('f_pel_telp'),
+        '*️⃣ Program Bantuan : ' + opt('f_pel_program')
+      );
+    }
+
+    return lines.join('\n');
   }
 
   var form = document.getElementById('pengajuanForm');
@@ -433,6 +481,19 @@
     setTimeout(function() { copyToast.classList.add('hidden'); }, 2500);
   });
 
+  // Toggle Data Pelapor
+  var togglePelapor = document.getElementById('f_toggle_pelapor');
+  var pelaporFields = document.getElementById('dataPelaporFields');
+  if (togglePelapor && pelaporFields) {
+    togglePelapor.addEventListener('change', function() {
+      if (togglePelapor.checked) {
+        pelaporFields.classList.remove('hidden');
+      } else {
+        pelaporFields.classList.add('hidden');
+      }
+    });
+  }
+
   btnNew.addEventListener('click', function() {
     form.reset();
     panel.classList.add('hidden');
@@ -448,6 +509,9 @@
       var err = el.parentNode.querySelector('.err');
       if (err) err.classList.add('hidden');
     });
+    // Reset Data Pelapor toggle + fields
+    if (togglePelapor) togglePelapor.checked = false;
+    if (pelaporFields) pelaporFields.classList.add('hidden');
     window.scrollTo({top:0,behavior:'smooth'});
   });
 
