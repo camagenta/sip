@@ -507,8 +507,15 @@
       var route = await osrmRoute(userPos.lat, userPos.lng, geo.lat, geo.lng);
 
       var distKm = route.distanceM / 1000;
-      var timeCar = Math.round(distKm / 30 * 60);
-      var timeMotor = Math.round(distKm / 39 * 60);
+      var isJabodetabek = /jakarta|bogor|depok|tangerang|bekasi|jabodetabek/i.test(alamat + ' ' + geo.display);
+      var timeCar, timeMotor;
+      if (isJabodetabek) {
+        timeCar = Math.round(distKm / 30 * 60);
+        timeMotor = Math.round(distKm / 39 * 60);
+      } else {
+        timeCar = Math.round(route.durationS / 60);
+        timeMotor = Math.round(timeCar * 0.8);
+      }
 
       updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, route.coords, alamat);
 
