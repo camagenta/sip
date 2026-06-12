@@ -688,57 +688,73 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Ambil nama jalan aja — potong di RT/RW/No/Kel/Kec pertama
+  // Ambil nama jalan — potong di RT/RW/No/Blok/Gang/Kel/Kec
   function extractStreetName(alamat) {
     var m = alamat.match(/^(.+?)\b(?:\s*(?:r[tw]\s*\d+|no\.?\s*\d+|blok|gg|gang|kel\b|kec\b))/i);
     if (m) return m[1].replace(/[,;]+$/, '').trim();
-    return alamat.split(',')[0].trim();
+    return alamat.split(',')[0].replace(/[,;\s]+$/, '').trim();
   }
 
-  // Geocode alamat → {lat, lng, display} via Nominatim (gratis, tanpa API key)
-  // Coba beberapa varian: full → drop dari belakang → nama jalan aja
+  // Ambil kodepos 5 digit dari alamat
+  function extractPostcode(alamat) {
+    var m = alamat.match(/\b(\d{5})\b/);
+    return m ? m[1] : null;
+  }
+
+  // Helper: fetch Nominatim, return {lat,lng,display} or null
+  async function nominatimFetch(params) {
+    var url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams(params);
+    var resp = await fetch(url, { headers: { 'User-Agent': 'SIP-Verifikator/1.0' } });
+    var json = await resp.json();
+    if (json && json.length > 0) {
+      return {
+        lat: parseFloat(json[0].lat),
+        lng: parseFloat(json[0].lon),
+        display: json[0].display_name
+      };
+    }
+    return null;
+  }
+
+  // Geocode alamat via structured query + fallback
+  //  1. Structured: street + country + postalcode  (paling akurat)
+  //  2. Structured: street + country                 (jika tanpa kodepos)
+  //  3. Free-form:  "nama jalan, Indonesia"           (jaring pengaman)
   async function geocodeAlamat(alamat) {
-    // Strip cuma RT/RW/No — biarin kel/kec/kota tetap utuh
-    var bersih = alamat
-      .replace(/\b(r[tw])\s*\d+/gi, '')
-      .replace(/\bno\.?\s*\d*/gi, '')
-      .replace(/\s+/g, ' ')
-      .replace(/,\s*,/g, ',')
-      .replace(/^[, ]+|[, ]+$/g, '')
-      .trim();
-
-    // Kumpulkan varian dari paling spesifik → paling simpel
-    var parts = bersih.split(/[,;]/).map(function(s) { return s.trim(); }).filter(Boolean);
-    var attempts = [];
-
-    for (var i = parts.length; i >= 1; i--) {
-      var a = parts.slice(0, i).join(', ');
-      if (a) attempts.push(a);
-    }
-
-    // Nama jalan doang sebagai jaring pengaman
     var street = extractStreetName(alamat);
-    if (street && attempts.indexOf(street) === -1) {
-      attempts.push(street);
-    }
+    var postcode = extractPostcode(alamat);
+    var result;
 
-    for (var j = 0; j < attempts.length; j++) {
-      var q = attempts[j] + ', Indonesia';
-      var resp = await fetch('https://nominatim.openstreetmap.org/search?' +
-        new URLSearchParams({ q: q, format: 'json', limit: '1' }), {
-        headers: { 'User-Agent': 'SIP-Verifikator/1.0' }
+    // 1) Structured dengan postalcode (filter ke area spesifik)
+    if (postcode) {
+      result = await nominatimFetch({
+        street: street,
+        country: 'Indonesia',
+        postalcode: postcode,
+        format: 'json',
+        limit: '1'
       });
-      var data = await resp.json();
-      if (data && data.length > 0) {
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon),
-          display: data[0].display_name
-        };
-      }
+      if (result) return result;
     }
 
-    throw new Error('Alamat tidak ditemukan. Coba tulis nama jalan + kota saja.');
+    // 2) Structured tanpa postalcode
+    result = await nominatimFetch({
+      street: street,
+      country: 'Indonesia',
+      format: 'json',
+      limit: '1'
+    });
+    if (result) return result;
+
+    // 3) Free-form fallback
+    result = await nominatimFetch({
+      q: street + ', Indonesia',
+      format: 'json',
+      limit: '1'
+    });
+    if (result) return result;
+
+    throw new Error('Alamat tidak ditemukan. Coba tulis nama jalan + kota.');
   }
 
   // Ambil posisi user via GPS browser
