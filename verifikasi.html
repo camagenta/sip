@@ -688,20 +688,57 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
+  // Ambil nama jalan aja — potong di RT/RW/No/Kel/Kec pertama
+  function extractStreetName(alamat) {
+    var m = alamat.match(/^(.+?)\b(?:\s*(?:r[tw]\s*\d+|no\.?\s*\d+|blok|gg|gang|kel\b|kec\b))/i);
+    if (m) return m[1].replace(/[,;]+$/, '').trim();
+    return alamat.split(',')[0].trim();
+  }
+
   // Geocode alamat → {lat, lng, display} via Nominatim (gratis, tanpa API key)
+  // Coba beberapa varian: full → drop dari belakang → nama jalan aja
   async function geocodeAlamat(alamat) {
-    var url = 'https://nominatim.openstreetmap.org/search?' +
-      new URLSearchParams({ q: alamat, format: 'json', limit: '1' });
-    var resp = await fetch(url, {
-      headers: { 'User-Agent': 'SIP-Verifikator/1.0' }
-    });
-    var data = await resp.json();
-    if (!data || data.length === 0) throw new Error('Alamat tidak ditemukan. Coba perjelas alamatnya.');
-    return {
-      lat: parseFloat(data[0].lat),
-      lng: parseFloat(data[0].lon),
-      display: data[0].display_name
-    };
+    // Strip cuma RT/RW/No — biarin kel/kec/kota tetap utuh
+    var bersih = alamat
+      .replace(/\b(r[tw])\s*\d+/gi, '')
+      .replace(/\bno\.?\s*\d*/gi, '')
+      .replace(/\s+/g, ' ')
+      .replace(/,\s*,/g, ',')
+      .replace(/^[, ]+|[, ]+$/g, '')
+      .trim();
+
+    // Kumpulkan varian dari paling spesifik → paling simpel
+    var parts = bersih.split(/[,;]/).map(function(s) { return s.trim(); }).filter(Boolean);
+    var attempts = [];
+
+    for (var i = parts.length; i >= 1; i--) {
+      var a = parts.slice(0, i).join(', ');
+      if (a) attempts.push(a);
+    }
+
+    // Nama jalan doang sebagai jaring pengaman
+    var street = extractStreetName(alamat);
+    if (street && attempts.indexOf(street) === -1) {
+      attempts.push(street);
+    }
+
+    for (var j = 0; j < attempts.length; j++) {
+      var q = attempts[j] + ', Indonesia';
+      var resp = await fetch('https://nominatim.openstreetmap.org/search?' +
+        new URLSearchParams({ q: q, format: 'json', limit: '1' }), {
+        headers: { 'User-Agent': 'SIP-Verifikator/1.0' }
+      });
+      var data = await resp.json();
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          display: data[0].display_name
+        };
+      }
+    }
+
+    throw new Error('Alamat tidak ditemukan. Coba tulis nama jalan + kota saja.');
   }
 
   // Ambil posisi user via GPS browser
@@ -808,7 +845,7 @@
       var userPos = await getUserPosition();
 
       statusText.textContent = 'Mencari alamat...';
-      var geo = await geocodeAlamat(alamat + ', Indonesia');
+      var geo = await geocodeAlamat(alamat);
 
       var distKm = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
       var timeMotor = Math.round(distKm / 40 * 60);
