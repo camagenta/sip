@@ -102,6 +102,20 @@
               <p class="text-[10px] text-stone-400">🚗 Mobil</p>
             </div>
           </div>
+          <!-- Action buttons -->
+          <div class="flex gap-2 pt-1">
+            <button type="button" id="btnSalinHasil"
+                    class="flex-1 bg-white hover:bg-teal-100 text-teal-700 text-xs font-semibold py-2 rounded-lg border border-teal-200 transition-all duration-150 flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              Salin Hasil
+            </button>
+            <button type="button" id="btnBagikan"
+                    class="flex-1 bg-white hover:bg-teal-100 text-teal-700 text-xs font-semibold py-2 rounded-lg border border-teal-200 transition-all duration-150 flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              Bagikan
+            </button>
+          </div>
+          <div id="locToast" class="hidden text-xs text-teal-700 bg-teal-100 border border-teal-200 rounded-lg px-3 py-2 text-center"></div>
         </div>
 
         <!-- Error -->
@@ -115,6 +129,16 @@
           Browser akan meminta izin akses lokasi — izinkan untuk mendeteksi posisi kamu.
           Jarak dan perkiraan waktu tempuh akan dihitung secara otomatis.
         </p>
+      </div>
+
+      <!-- History -->
+      <div id="historySection">
+        <button type="button" id="btnToggleHistory"
+                class="w-full flex items-center justify-between bg-white border border-stone-200 rounded-lg px-3 py-2.5 text-xs font-semibold text-stone-500 hover:text-stone-700 hover:border-stone-300 transition-all duration-150">
+          <span>📋 Riwayat Pencarian</span>
+          <span id="historyCount" class="text-[10px] text-stone-400"></span>
+        </button>
+        <div id="historyList" class="hidden mt-2 space-y-1.5 max-h-60 overflow-y-auto"></div>
       </div>
 
     </div>
@@ -343,6 +367,116 @@
     }
   });
 
+  // Simpan riwayat ke localStorage
+  function saveHistory(entry) {
+    var raw = localStorage.getItem('sip_lokasi_history');
+    var list = raw ? JSON.parse(raw) : [];
+    // Cegah duplikat alamat yang sama persis
+    list = list.filter(function(e) { return e.alamat !== entry.alamat; });
+    list.unshift(entry);
+    if (list.length > 20) list = list.slice(0, 20); // max 20 item
+    localStorage.setItem('sip_lokasi_history', JSON.stringify(list));
+  }
+
+  // Hapus riwayat
+  function clearHistory() {
+    localStorage.removeItem('sip_lokasi_history');
+    renderHistory();
+  }
+
+  // Render daftar riwayat
+  function renderHistory() {
+    var raw = localStorage.getItem('sip_lokasi_history');
+    var list = raw ? JSON.parse(raw) : [];
+    var container = document.getElementById('historyList');
+    var count = document.getElementById('historyCount');
+
+    if (!container) return;
+    if (count) count.textContent = list.length ? list.length + ' item' : '';
+
+    if (list.length === 0) {
+      container.innerHTML = '<p class="text-xs text-stone-400 text-center py-3">Belum ada riwayat</p>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i];
+      var d = e.distance;
+      html += '<div class="history-item cursor-pointer bg-white border border-stone-200 hover:border-teal-300 rounded-lg px-3 py-2 text-xs transition-all duration-150" data-idx="' + i + '">' +
+        '<div class="flex items-start justify-between gap-2">' +
+          '<div class="min-w-0 flex-1">' +
+            '<p class="font-medium text-stone-700 truncate">' + escHtml(e.alamat) + '</p>' +
+            '<p class="text-[10px] text-stone-400 mt-0.5 truncate">' + escHtml(e.displayAddress || '') + '</p>' +
+          '</div>' +
+          '<div class="text-right shrink-0">' +
+            '<p class="font-bold text-teal-700">' + d + '</p>' +
+            '<p class="text-[10px] text-stone-400">' + e.timeMotor + '</p>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    html += '<button id="btnClearHistory" class="w-full text-[10px] text-stone-400 hover:text-red-500 text-center py-1.5 transition-colors">Hapus riwayat</button>';
+    container.innerHTML = html;
+
+    // Click item → isi alamat & jalankan
+    container.querySelectorAll('.history-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx, 10);
+        var raw = localStorage.getItem('sip_lokasi_history');
+        var list = raw ? JSON.parse(raw) : [];
+        if (list[idx]) {
+          alamatInput.value = list[idx].alamat;
+          document.getElementById('btnToggleHistory').click(); // tutup history
+          btnCek.click();
+        }
+      });
+    });
+
+    var clearBtn = document.getElementById('btnClearHistory');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearHistory();
+      });
+    }
+  }
+
+  // Escape HTML untuk keamanan
+  function escHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // Build teks hasil untuk disalin
+  function buildResultText(alamat, displayAddress, distance, timeMotor, timeCar) {
+    return [
+      '📍 HASIL CEK LOKASI SIP',
+      '',
+      'Alamat Pemohon : ' + alamat,
+      'Lokasi Terdeteksi : ' + (displayAddress || '-'),
+      '',
+      'Jarak : ' + distance,
+      '🛵 Motor : ' + timeMotor,
+      '🚗 Mobil : ' + timeCar,
+      '',
+      '— SIP Verifikator Tools',
+    ].join('\n');
+  }
+
+  // Toast notifikasi
+  function showToast(msg) {
+    var toast = document.getElementById('locToast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(function() { toast.classList.add('hidden'); }, 2500);
+  }
+
+  // Variabel global untuk hasil terakhir
+  var lastResult = null;
+
   // Main action
   btnCek.addEventListener('click', async function() {
     if (!validateAlamat()) {
@@ -388,13 +522,34 @@
 
       updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, alamat);
 
+      var distText = distKm < 1 ? (distKm * 1000).toFixed(0) + ' m' : distKm.toFixed(1) + ' km';
+      var timeMotorText = formatMenit(timeMotor);
+      var timeCarText = formatMenit(timeCar);
+
       locAddress.textContent = geo.display;
-      locDistance.textContent = distKm < 1 ? (distKm * 1000).toFixed(0) + ' m' : distKm.toFixed(1) + ' km';
-      locTimeMotor.textContent = formatMenit(timeMotor);
-      locTimeCar.textContent = formatMenit(timeCar);
+      locDistance.textContent = distText;
+      locTimeMotor.textContent = timeMotorText;
+      locTimeCar.textContent = timeCarText;
 
       statusEl.classList.add('hidden');
       resultEl.classList.remove('hidden');
+
+      // Simpan hasil terakhir untuk tombol salin/bagikan
+      lastResult = {
+        alamat: alamat,
+        displayAddress: geo.display,
+        distance: distText,
+        timeMotor: timeMotorText,
+        timeCar: timeCarText,
+        lat: geo.lat,
+        lng: geo.lng,
+        userLat: userPos.lat,
+        userLng: userPos.lng,
+      };
+
+      // Simpan ke riwayat
+      saveHistory(lastResult);
+      renderHistory();
 
     } catch (err) {
       statusEl.classList.add('hidden');
@@ -402,6 +557,74 @@
       errorEl.textContent = '❌ ' + err.message;
     }
   });
+
+  // Salin Hasil
+  document.getElementById('btnSalinHasil').addEventListener('click', async function() {
+    if (!lastResult) return;
+    var text = buildResultText(
+      lastResult.alamat,
+      lastResult.displayAddress,
+      lastResult.distance,
+      lastResult.timeMotor,
+      lastResult.timeCar
+    );
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('✅ Hasil tersalin! Siap tempel ke laporan.');
+    } catch (_) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('✅ Hasil tersalin!');
+    }
+  });
+
+  // Bagikan
+  document.getElementById('btnBagikan').addEventListener('click', async function() {
+    if (!lastResult) return;
+    var text = buildResultText(
+      lastResult.alamat,
+      lastResult.displayAddress,
+      lastResult.distance,
+      lastResult.timeMotor,
+      lastResult.timeCar
+    );
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Cek Lokasi SIP',
+          text: text,
+        });
+      } catch (_) {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('✅ Disalin! Kirim ke WA/Telegram.');
+      } catch (_) {
+        showToast('❌ Gagal. Salin manual.');
+      }
+    }
+  });
+
+  // Toggle riwayat
+  var btnToggleHistory = document.getElementById('btnToggleHistory');
+  var historyList = document.getElementById('historyList');
+  if (btnToggleHistory && historyList) {
+    btnToggleHistory.addEventListener('click', function() {
+      var isHidden = historyList.classList.contains('hidden');
+      historyList.classList.toggle('hidden');
+      if (isHidden) renderHistory();
+    });
+  }
+
+  // Render riwayat saat load
+  renderHistory();
+
 })();
 </script>
 </body>
