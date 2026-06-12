@@ -827,6 +827,20 @@
     setTimeout(function() { mapInstance.invalidateSize(); }, 150);
   }
 
+  // Route real via OSRM (gratis, tanpa API key — pakai data OSM)
+  async function osrmRoute(fromLat, fromLng, toLat, toLng) {
+    try {
+      var url = 'https://router.project-osrm.org/route/v1/driving/' +
+        fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=false';
+      var resp = await fetch(url, { headers: { 'User-Agent': 'SIP-Verifikator/1.0' } });
+      var data = await resp.json();
+      if (data && data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        return { distanceM: data.routes[0].distance, durationS: data.routes[0].duration };
+      }
+    } catch (e) {}
+    return null;
+  }
+
   // Format menit ke teks
   function formatMenit(total) {
     if (total < 60) return '~' + total + ' mnt';
@@ -863,9 +877,21 @@
       statusText.textContent = 'Mencari alamat...';
       var geo = await geocodeAlamat(alamat);
 
-      var distKm = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
-      var timeMotor = Math.round(distKm / 40 * 60);
-      var timeCar   = Math.round(distKm / 30 * 60);
+      statusText.textContent = 'Menghitung rute...';
+
+      // Coba routing real via OSRM, fallback ke Haversine kalo gagal
+      var route = await osrmRoute(userPos.lat, userPos.lng, geo.lat, geo.lng);
+      var distKm, timeMotor, timeCar;
+
+      if (route) {
+        distKm    = route.distanceM / 1000;
+        timeCar   = Math.round(route.durationS / 60);
+        timeMotor = Math.round(distKm / 40 * 60); // motor lebih gesit di kota
+      } else {
+        distKm    = haversineKm(userPos.lat, userPos.lng, geo.lat, geo.lng);
+        timeMotor = Math.round(distKm / 40 * 60);
+        timeCar   = Math.round(distKm / 30 * 60);
+      }
 
       updateMap(userPos.lat, userPos.lng, geo.lat, geo.lng, alamat);
 
